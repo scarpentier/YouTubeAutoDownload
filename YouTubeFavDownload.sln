@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeAutoDownload", "YouTubeAutoDownload.csproj", "{3E3155A0-38E8-4446-B3A8-C8A56FA5C529}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeFavDownload", "YouTubeFavDownload.csproj", "{3E3155A0-38E8-4446-B3A8-C8A56FA5C529}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
