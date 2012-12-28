@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace YouTubeFavDownload
 {
-    public static class ListExtension
+    internal static class ListExtension
     {
         public static void LoadXml<T>(this List<T> list, string fileName)
         {
@@ -46,7 +46,7 @@ namespace YouTubeFavDownload
     }
 
     [XmlRoot("dictionary")]
-    public class SerializableDictionary<TKey, TValue>
+    internal class SerializableDictionary<TKey, TValue>
         : Dictionary<TKey, TValue>, IXmlSerializable
     {
         #region IXmlSerializable Members

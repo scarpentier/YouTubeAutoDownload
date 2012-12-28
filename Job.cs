@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
+
+using YoutubeExtractor;
 
 namespace YouTubeFavDownload
 {
-    using System.IO;
-    using System.Xml.Linq;
-
-    using YoutubeExtractor;
-
     internal class Job
     {
         /// <summary>
@@ -26,7 +25,7 @@ namespace YouTubeFavDownload
         /// </summary>
         public string UserName { get; set; }
 
-        private string destinationFolder;
+        private string _destinationFolder;
 
         /// <summary>
         /// Destination folder in which we'll put the downloaded videos
@@ -35,12 +34,12 @@ namespace YouTubeFavDownload
         {
             get
             {
-                if (string.IsNullOrEmpty(destinationFolder)) destinationFolder = Environment.CurrentDirectory;
-                return destinationFolder;
+                if (string.IsNullOrEmpty(_destinationFolder)) _destinationFolder = Environment.CurrentDirectory;
+                return _destinationFolder;
             }
             set
             {
-                destinationFolder = value;
+                _destinationFolder = value;
             }
         }
 
@@ -90,9 +89,9 @@ namespace YouTubeFavDownload
         /// <returns>List of favorites</returns>
         public static List<Video> GetFavorites(string username, int startIndex = 1)
         {
-            const int ApiMaxResults = 50; // Maximum results allowed by YouTube API
+            const int apiMaxResults = 50; // Maximum results allowed by YouTube API
 
-            var xml = XDocument.Load(string.Format(YouTubeApiUrl, username, ApiMaxResults, startIndex));
+            var xml = XDocument.Load(string.Format(YouTubeApiUrl, username, apiMaxResults, startIndex));
 
             // Get the videos
             var list = (from x in xml.Descendants(NsAtom + "entry")
