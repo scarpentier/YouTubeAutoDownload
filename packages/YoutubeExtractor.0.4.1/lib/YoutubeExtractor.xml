@@ -75,6 +75,16 @@
             <exception cref="T:YoutubeExtractor.AudioExtractionException">An error occured during audio extraction.</exception>
             <exception cref="T:System.Net.WebException">An error occured while downloading the video.</exception>
         </member>
+        <member name="E:YoutubeExtractor.AudioDownloader.AudioExtractionProgressChanged">
+            <summary>
+            Occurs when the progress of the audio extraction has changed.
+            </summary>
+        </member>
+        <member name="E:YoutubeExtractor.AudioDownloader.DownloadProgressChanged">
+            <summary>
+            Occurs when the download progress of the video file has changed.
+            </summary>
+        </member>
         <member name="T:YoutubeExtractor.AudioExtractionException">
             <summary>
             The exception that is thrown when an error occurs durin audio extraction.
@@ -131,6 +141,11 @@
             </summary>
             <exception cref="T:System.IO.IOException">The video file could not be saved.</exception>
             <exception cref="T:System.Net.WebException">An error occured while downloading the video.</exception>
+        </member>
+        <member name="E:YoutubeExtractor.VideoDownloader.DownloadProgressChanged">
+            <summary>
+            Occurs when the downlaod progress of the video file has changed.
+            </summary>
         </member>
         <member name="P:YoutubeExtractor.VideoInfo.AudioBitrate">
             <summary>
