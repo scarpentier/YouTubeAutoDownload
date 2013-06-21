@@ -25,6 +25,8 @@ namespace YouTubeFavDownload
         /// </summary>
         public string UserName { get; set; }
 
+        public int MaxDownloads { get; set; }
+
         private string _destinationFolder;
 
         /// <summary>
@@ -48,9 +50,10 @@ namespace YouTubeFavDownload
             
         }
 
-        public Job(string username, string destinationFolder)
+        public Job(string username, string destinationFolder, int maxDownloads = 50)
         {
             UserName = username;
+            MaxDownloads = maxDownloads;
             DestinationFolder = destinationFolder;
         }
 
@@ -63,22 +66,29 @@ namespace YouTubeFavDownload
                 throw new ArgumentNullException(UserName);
 
             var vids = new List<Video>();
-            if (File.Exists("videos.xml")) vids.LoadXml("videos.xml");
+            //if (File.Exists("videos.xml")) vids.LoadXml("videos.xml");
 
             // We're gonna get favorites until we hit a file we've already downloaded.
                       
-            var favs = GetFavorites(UserName);
+            var favs = GetFavorites(UserName, MaxDownloads);
 
             foreach (var fav in favs.TakeWhile(fav => !vids.Contains(fav)))
             {
                 Console.Write("Downloading {0}... ", fav.Title);
-                DownloadVideo(fav.Url, DestinationFolder);
-                vids.Add(fav);
-                Console.WriteLine("[OK]");
+                try
+                {
+                    DownloadVideo(fav.Url, DestinationFolder);
+                    vids.Add(fav);
+                    Console.WriteLine("[OK]");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("[ERROR]: {0}", ex.Message);
+                }
             }
 
             // Save the file
-            vids.SaveXml("videos.xml");
+            //vids.SaveXml("videos.xml");
         }
 
         /// <summary>
@@ -87,11 +97,11 @@ namespace YouTubeFavDownload
         /// <param name="username">Youtube Username</param>
         /// <param name="startIndex"> </param>
         /// <returns>List of favorites</returns>
-        public static List<Video> GetFavorites(string username, int startIndex = 1)
+        public static List<Video> GetFavorites(string username, int maxResults = 50, int startIndex = 1)
         {
-            const int apiMaxResults = 50; // Maximum results allowed by YouTube API
+            //const int apiMaxResults = 50; // Maximum results allowed by YouTube API
 
-            var xml = XDocument.Load(string.Format(YouTubeApiUrl, username, apiMaxResults, startIndex));
+            var xml = XDocument.Load(string.Format(YouTubeApiUrl, username, maxResults, startIndex));
 
             // Get the videos
             var list = (from x in xml.Descendants(NsAtom + "entry")
@@ -117,10 +127,12 @@ namespace YouTubeFavDownload
             if (string.IsNullOrEmpty(destination)) destination = Environment.CurrentDirectory;
 
             // Get single video
+
             IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(url);
 
             // Get the highest MP4 resolution
-            VideoInfo video = videoInfos.OrderByDescending(v => v.Resolution).First(v => v.VideoType == VideoType.Mp4);
+            VideoInfo video =
+                videoInfos.OrderByDescending(v => v.Resolution).First(v => v.VideoType == VideoType.Mp4);
 
             string filename = Path.Combine(destination, video.Title + video.VideoExtension);
             if (File.Exists(filename))

@@ -21,7 +21,7 @@ namespace YouTubeFavDownload
         public static void SaveXml<T>(this List<T> list, string fileName)
         {
             var serializer = new XmlSerializer(typeof(List<T>));
-            using (var stream = File.OpenRead(fileName))
+            using (var stream = File.OpenWrite(fileName))
             {
                 var other = (List<T>)(serializer.Deserialize(stream));
                 list.Clear();
