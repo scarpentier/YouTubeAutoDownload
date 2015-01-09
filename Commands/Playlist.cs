@@ -70,7 +70,7 @@ namespace YouTubeAutoDownload.Commands
                                           StartInfo = new ProcessStartInfo
                                                           {
                                                               FileName = "youtube-dl",
-                                                              Arguments = "-f mp4/bestvideo+bestaudio https://www.youtube.com/watch?v=" + v
+                                                              Arguments = "-f bestvideo+bestaudio https://www.youtube.com/watch?v=" + v
                                                           }
                                       };
                     process.Start();
