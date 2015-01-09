@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YouTubeFavDownload
+namespace YouTubeAutoDownload
 {
     class Program
     {
@@ -13,14 +13,11 @@ namespace YouTubeFavDownload
             }
 
             string username = args[0];
-
-            int maxDownloads = 20;
-            if (args.Length >= 2) maxDownloads = int.Parse(args[1]);
-            
+           
             string destinationFolder = Environment.CurrentDirectory;
-            if (args.Length == 3) destinationFolder = args[2];
+            if (args.Length == 2) destinationFolder = args[1];
 
-            var job = new Job(username, destinationFolder, maxDownloads);
+            var job = new Job(username, destinationFolder);
             job.Start();
 
             Console.WriteLine("All done");
@@ -31,9 +28,9 @@ namespace YouTubeFavDownload
         /// </summary>
         public static void PrintHelp()
         {
-            Console.WriteLine("Downloads a YouTube user's last 20 favorite videos to your hard drive");
+            Console.WriteLine("Downloads the last 25 videos from any public Youtube playlist");
             Console.WriteLine();
-            Console.WriteLine("Usage: YouTubeFavDownload username [maxDownloads] [destination]");
+            Console.WriteLine("Usage: YouTubeFavDownload playlistId [destination]");
         }
     }
 }

@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-using YoutubeExtractor;
+using Newtonsoft.Json;
 
-namespace YouTubeFavDownload
+namespace YouTubeAutoDownload
 {
     internal class Job
     {
         /// <summary>
         /// URL to the YouTube API
         /// </summary>
-        private const string YouTubeApiUrl = @"https://gdata.youtube.com/feeds/api/users/{0}/favorites?start-index={2}&safeSearch=none&v=2&max-results={1}";
+        private const string YouTubeApiUrl = @"https://gdata.youtube.com/feeds/api/playlists/{0}?v=2";
 
         /// <summary>
         /// Atom XML Namespace required to read data comming from the YouTube API
         /// </summary>
         private static readonly XNamespace NsAtom = XNamespace.Get("http://www.w3.org/2005/Atom");
 
-        /// <summary>
-        /// YouTube User Name that we'll get the favorites from
-        /// </summary>
-        public string UserName { get; set; }
+        private const string SaveFileName = "playlists.json";
 
-        public int MaxDownloads { get; set; }
+        /// <summary>
+        /// YouTube playlist id
+        /// </summary>
+        public string PlaylistId { get; set; }
 
         private string _destinationFolder;
 
@@ -36,12 +37,12 @@ namespace YouTubeFavDownload
         {
             get
             {
-                if (string.IsNullOrEmpty(_destinationFolder)) _destinationFolder = Environment.CurrentDirectory;
-                return _destinationFolder;
+                if (string.IsNullOrEmpty(this._destinationFolder)) this._destinationFolder = Environment.CurrentDirectory;
+                return this._destinationFolder;
             }
             set
             {
-                _destinationFolder = value;
+                this._destinationFolder = value;
             }
         }
 
@@ -50,11 +51,10 @@ namespace YouTubeFavDownload
             
         }
 
-        public Job(string username, string destinationFolder, int maxDownloads = 50)
+        public Job(string playlistId, string destinationFolder)
         {
-            UserName = username;
-            MaxDownloads = maxDownloads;
-            DestinationFolder = destinationFolder;
+            this.PlaylistId = playlistId;
+            this.DestinationFolder = destinationFolder;
         }
 
         /// <summary>
@@ -62,24 +62,37 @@ namespace YouTubeFavDownload
         /// </summary>
         public void Start()
         {
-            if (string.IsNullOrEmpty(UserName))
-                throw new ArgumentNullException(UserName);
+            // Load json file
+            var savedata = new Dictionary<string, string>();
+            if (File.Exists(SaveFileName))
+                savedata = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(SaveFileName));
 
-            var vids = new List<Video>();
-            //if (File.Exists("videos.xml")) vids.LoadXml("videos.xml");
+            if (string.IsNullOrEmpty(this.PlaylistId))
+                throw new ArgumentNullException(this.PlaylistId);
 
-            // We're gonna get favorites until we hit a file we've already downloaded.
-                      
-            var favs = GetFavorites(UserName, MaxDownloads);
+            var videos = GetVideos(this.PlaylistId);
 
-            foreach (var fav in favs.TakeWhile(fav => !vids.Contains(fav)))
+            var firstDownloaded = string.Empty;
+
+            foreach (var v in videos)
             {
-                Console.Write("Downloading {0}... ", fav.Title);
+                if (savedata.ContainsKey(this.PlaylistId) && savedata[this.PlaylistId] == v.Url) return;
+
+                if (string.IsNullOrEmpty(firstDownloaded)) firstDownloaded = v.Url;
+
+                Console.WriteLine("Downloading {0}... ", v.Title);
                 try
                 {
-                    DownloadVideo(fav.Url, DestinationFolder);
-                    vids.Add(fav);
-                    Console.WriteLine("[OK]");
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "youtube-dl",
+                            Arguments = "-f mp4/bestvideo+bestaudio " + v.Url
+                        }
+                    };
+                    process.Start();
+                    process.WaitForExit();
                 }
                 catch (Exception ex)
                 {
@@ -87,21 +100,20 @@ namespace YouTubeFavDownload
                 }
             }
 
-            // Save the file
-            //vids.SaveXml("videos.xml");
+            savedata[this.PlaylistId] = firstDownloaded;
+            File.WriteAllText(SaveFileName, JsonConvert.SerializeObject(savedata, Formatting.Indented));
         }
 
         /// <summary>
-        /// Gets the list of the user's favorites YouTube videos
+        /// Gets a list of video from a playlist ID
         /// </summary>
-        /// <param name="username">Youtube Username</param>
-        /// <param name="startIndex"> </param>
-        /// <returns>List of favorites</returns>
-        public static List<Video> GetFavorites(string username, int maxResults = 50, int startIndex = 1)
+        /// <param name="playlistId">Id of playlist</param>
+        /// <returns>List of videos</returns>
+        public static List<Video> GetVideos(string playlistId)
         {
-            //const int apiMaxResults = 50; // Maximum results allowed by YouTube API
-
-            var xml = XDocument.Load(string.Format(YouTubeApiUrl, username, maxResults, startIndex));
+            Console.WriteLine("Getting videos...");
+            
+            var xml = XDocument.Load(string.Format(YouTubeApiUrl, playlistId));
 
             // Get the videos
             var list = (from x in xml.Descendants(NsAtom + "entry")
@@ -113,39 +125,10 @@ namespace YouTubeFavDownload
 
             return list;
         }
-
-        /// <summary>
-        /// Downloads a YouTube video to the specified location
-        /// </summary>
-        /// <param name="url">Public URL of the video as a user would see it</param>
-        /// <param name="destination">Destination path</param>
-        public static void DownloadVideo(string url, string destination)
-        {
-            if (string.IsNullOrEmpty(url))
-                throw new ArgumentNullException(url);
-
-            if (string.IsNullOrEmpty(destination)) destination = Environment.CurrentDirectory;
-
-            // Get single video
-
-            IEnumerable<VideoInfo> videoInfos = DownloadUrlResolver.GetDownloadUrls(url);
-
-            // Get the highest MP4 resolution
-            VideoInfo video =
-                videoInfos.OrderByDescending(v => v.Resolution).First(v => v.VideoType == VideoType.Mp4);
-
-            string filename = Path.Combine(destination, video.Title + video.VideoExtension);
-            if (File.Exists(filename))
-                return;
-
-            var videoDownloader = new VideoDownloader(video, filename);
-
-            videoDownloader.Execute();
-        }
     }
 
     [Serializable]
-    public class Video
+    internal class Video
     {
         public string Title { get; set; }
         public string Url { get; set; }
