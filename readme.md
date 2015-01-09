@@ -2,7 +2,7 @@
 This simple console application will download any public Youtube playlist to your hard drive.
 
 ## Usage
-	YouTubeAutoDownload favorite -k {YOUR API KEY} -p {PLAYLIST ID}
+	YouTubeAutoDownload playlist -k {YOUR API KEY} -p {PLAYLIST ID}
 
 `-k` is your personal Google API key, available from the [Google Developers Console](https://console.developers.google.com/project)
 `-p` is the playlist you want to download
