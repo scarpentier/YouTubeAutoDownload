@@ -1,15 +1,14 @@
 # YouTube Auto Downloader
-This simple console application will download the last 25 videos from any public Youtube playlist
+This simple console application will download any public Youtube playlist to your hard drive.
 
 ## Usage
-	YouTubeAutoDownload playlistId
+	YouTubeAutoDownload favorite -k {YOUR API KEY} -p {PLAYLIST ID}
 
-`playlistId` is the playlist you want to download
+`-k` is your personal Google API key, available from the [Google Developers Console](https://console.developers.google.com/project)
+`-p` is the playlist you want to download
 
 ### Schedule
-You can schedule the app with the Windows Task Scheduler or by typing the following line in a command prompt:
-
-	at 1:00 /every:M,T,W,Th,F,S,Su c:\bin\YouTubeAutoDownload 8BCDD04DE8F771B2
+You can schedule the app with the Windows Task Scheduler
 
 ## Additional information
 
