@@ -27,7 +27,7 @@ namespace YouTubeAutoDownload
         {
             Console.WriteLine("Downloads the last 25 videos from any public Youtube playlist");
             Console.WriteLine();
-            Console.WriteLine("Usage: YouTubeFavDownload playlistId");
+            Console.WriteLine("Usage: YouTubeAutoDownload playlistId");
         }
     }
 }
