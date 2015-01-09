@@ -28,33 +28,9 @@ namespace YouTubeAutoDownload
         /// </summary>
         public string PlaylistId { get; set; }
 
-        private string _destinationFolder;
-
-        /// <summary>
-        /// Destination folder in which we'll put the downloaded videos
-        /// </summary>
-        public string DestinationFolder
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(this._destinationFolder)) this._destinationFolder = Environment.CurrentDirectory;
-                return this._destinationFolder;
-            }
-            set
-            {
-                this._destinationFolder = value;
-            }
-        }
-
-        public Job()
-        {
-            
-        }
-
-        public Job(string playlistId, string destinationFolder)
+        public Job(string playlistId)
         {
             this.PlaylistId = playlistId;
-            this.DestinationFolder = destinationFolder;
         }
 
         /// <summary>

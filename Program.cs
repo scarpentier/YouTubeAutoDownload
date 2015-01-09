@@ -12,12 +12,9 @@ namespace YouTubeAutoDownload
                 return;
             }
 
-            string username = args[0];
+            string playlistid = args[0];
            
-            string destinationFolder = Environment.CurrentDirectory;
-            if (args.Length == 2) destinationFolder = args[1];
-
-            var job = new Job(username, destinationFolder);
+            var job = new Job(playlistid);
             job.Start();
 
             Console.WriteLine("All done");
