@@ -1,33 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+
+using ManyConsole;
 
 namespace YouTubeAutoDownload
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            if (args == null || args.Length < 1) 
-            {
-                PrintHelp();
-                return;
-            }
+            // locate any commands in the assembly (or use an IoC container, or whatever source)
+            var commands = GetCommands();
 
-            string playlistid = args[0];
-           
-            var job = new Job(playlistid);
-            job.Start();
-
-            Console.WriteLine("All done");
+            // then run them.
+            return ConsoleCommandDispatcher.DispatchCommand(commands, args, Console.Out);
         }
 
-        /// <summary>
-        /// Prints the help in the console window
-        /// </summary>
-        public static void PrintHelp()
+        public static IEnumerable<ConsoleCommand> GetCommands()
         {
-            Console.WriteLine("Downloads the last 25 videos from any public Youtube playlist");
-            Console.WriteLine();
-            Console.WriteLine("Usage: YouTubeAutoDownload playlistId");
+            return ConsoleCommandDispatcher.FindCommandsInSameAssemblyAs(typeof(Program));
         }
     }
 }
