@@ -8,6 +8,8 @@ This simple console application will download any public Youtube playlist to you
 
 `-p` is the playlist you want to download
 
+`--audioonly` is an optional switch that will download only the audio
+
 ### Schedule
 You can schedule the app with the Windows Task Scheduler
 

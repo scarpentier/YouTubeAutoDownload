@@ -14,6 +14,7 @@ namespace YouTubeAutoDownload.Commands
     {
         private string Key { get; set; }
         private string PlaylistId { get; set; }
+        private bool IsAudioOnly { get; set; }
 
         private const string ApiUrl = "https://www.googleapis.com/youtube/v3/playlistItems?key={0}&part=contentDetails&playlistId={1}&maxResults=50&pageToken={2}";
 
@@ -23,6 +24,7 @@ namespace YouTubeAutoDownload.Commands
             this.IsCommand("playlist", "Downloads youtube videos from a playlist");
             this.HasRequiredOption("k|key=", "API Key", k => Key = k);
             this.HasRequiredOption("p|playlist=", "Playlist Id", p => PlaylistId = p);
+            this.HasOption("audioonly", "Downloads only audio", a => IsAudioOnly = !string.IsNullOrEmpty(a));
         }
 
         public override int Run(string[] remainingArguments)
@@ -58,6 +60,13 @@ namespace YouTubeAutoDownload.Commands
 
             var firstDownloaded = string.Empty;
 
+            // Do we want to download video+audio or audio only?
+            string args;
+            if (IsAudioOnly)
+                args = "-f bestaudio https://www.youtube.com/watch?v={0}";
+            else
+                args = "-f bestvideo+bestaudio https://www.youtube.com/watch?v={0}";
+
             foreach (var v in videos.Where(v => !savedata.Contains(v)))
             {
                 if (string.IsNullOrEmpty(firstDownloaded)) firstDownloaded = v;
@@ -66,13 +75,13 @@ namespace YouTubeAutoDownload.Commands
                 try
                 {
                     var process = new Process
-                                      {
-                                          StartInfo = new ProcessStartInfo
-                                                          {
-                                                              FileName = "youtube-dl",
-                                                              Arguments = "-f bestvideo+bestaudio https://www.youtube.com/watch?v=" + v
-                                                          }
-                                      };
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "youtube-dl",
+                            Arguments = string.Format(args, v)
+                        }
+                    };
                     process.Start();
                     process.WaitForExit();
 
